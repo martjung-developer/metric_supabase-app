@@ -32,26 +32,28 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Please use your @lccbonline.edu.ph school email.' }, { status: 403 })
   }
 
-  const captchaSecret = process.env.TURNSTILE_SECRET
-  if (!captchaSecret) {
-    console.error('[signup-otp/send] TURNSTILE_SECRET is not set.')
-    return NextResponse.json({ error: 'Verification service is unavailable.' }, { status: 500 })
-  }
+  if (process.env.NEXT_PUBLIC_TURNSTILE_ENABLED !== 'false') {
+    const captchaSecret = process.env.TURNSTILE_SECRET
+    if (!captchaSecret) {
+      console.error('[signup-otp/send] TURNSTILE_SECRET is not set.')
+      return NextResponse.json({ error: 'Verification service is unavailable.' }, { status: 500 })
+    }
 
-  const captchaBody = new URLSearchParams({ secret: captchaSecret, response: captchaToken })
-  let captchaResponse: Response
-  try {
-    captchaResponse = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: captchaBody,
-    })
-  } catch {
-    return NextResponse.json({ error: 'Could not verify CAPTCHA. Please try again.' }, { status: 502 })
-  }
-  const captchaResult = await captchaResponse.json() as { success?: boolean }
-  if (!captchaResponse.ok || !captchaResult.success) {
-    return NextResponse.json({ error: 'CAPTCHA verification failed. Please try again.' }, { status: 400 })
+    const captchaBody = new URLSearchParams({ secret: captchaSecret, response: captchaToken })
+    let captchaResponse: Response
+    try {
+      captchaResponse = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: captchaBody,
+      })
+    } catch {
+      return NextResponse.json({ error: 'Could not verify CAPTCHA. Please try again.' }, { status: 502 })
+    }
+    const captchaResult = await captchaResponse.json() as { success?: boolean }
+    if (!captchaResponse.ok || !captchaResult.success) {
+      return NextResponse.json({ error: 'CAPTCHA verification failed. Please try again.' }, { status: 400 })
+    }
   }
 
   let supabase

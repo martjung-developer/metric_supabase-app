@@ -16,6 +16,7 @@ declare global {
 export type TurnstileHandle = { reset: () => void }
 
 const SCRIPT_ID = 'cloudflare-turnstile-script'
+const isTurnstileEnabled = process.env.NEXT_PUBLIC_TURNSTILE_ENABLED !== 'false'
 
 const Turnstile = forwardRef<TurnstileHandle, { onToken: (token: string) => void }>(function Turnstile({ onToken }, ref) {
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
@@ -24,7 +25,7 @@ const Turnstile = forwardRef<TurnstileHandle, { onToken: (token: string) => void
   const [widgetError, setWidgetError] = useState('')
 
   useEffect(() => {
-    if (!siteKey) { console.warn('NEXT_PUBLIC_TURNSTILE_SITE_KEY is not set; Turnstile is disabled.') }
+    if (isTurnstileEnabled && !siteKey) { console.warn('NEXT_PUBLIC_TURNSTILE_SITE_KEY is not set; Turnstile is disabled.') }
   }, [siteKey])
 
   useImperativeHandle(ref, () => ({
@@ -36,7 +37,7 @@ const Turnstile = forwardRef<TurnstileHandle, { onToken: (token: string) => void
   }), [onToken])
 
   function renderWidget() {
-    if (!siteKey || !containerRef.current || !window.turnstile || widgetIdRef.current) { return }
+    if (!isTurnstileEnabled || !siteKey || !containerRef.current || !window.turnstile || widgetIdRef.current) { return }
     widgetIdRef.current = window.turnstile.render(containerRef.current, {
       sitekey: siteKey,
       theme: 'light',
@@ -49,7 +50,7 @@ const Turnstile = forwardRef<TurnstileHandle, { onToken: (token: string) => void
 
   useEffect(() => { renderWidget() })
 
-  if (!siteKey) { return null }
+  if (!isTurnstileEnabled || !siteKey) { return null }
   return <>
     <Script id={SCRIPT_ID} src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" strategy="afterInteractive" onLoad={renderWidget} />
     <div className={styles.turnstileWrap}>

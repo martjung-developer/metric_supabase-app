@@ -68,6 +68,7 @@ export default function LoginPage() {
 }
 
 function LoginContent() {
+  const turnstileEnabled = process.env.NEXT_PUBLIC_TURNSTILE_ENABLED !== 'false'
   const searchParams = useSearchParams()
   const queryRole    = searchParams.get('role')
   const nextPath     = searchParams.get('next') ?? undefined
@@ -292,8 +293,8 @@ function LoginContent() {
             <motion.button
               type="submit"
               className={styles.submitBtn}
-              disabled={loading || !captchaToken}
-              whileHover={loading || !captchaToken ? {} : { y: -1 }}
+              disabled={loading || (turnstileEnabled && !captchaToken)}
+              whileHover={loading || (turnstileEnabled && !captchaToken) ? {} : { y: -1 }}
               whileTap={loading  ? {} : { scale: 0.985 }}
             >
               {loading

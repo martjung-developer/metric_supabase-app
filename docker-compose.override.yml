@@ -1,4 +1,10 @@
 services:
+  auth:
+    environment:
+      GOTRUE_SECURITY_CAPTCHA_ENABLED: "false"
+      GOTRUE_SECURITY_CAPTCHA_PROVIDER: ""
+      GOTRUE_SECURITY_CAPTCHA_SECRET: ""
+
   nextjs:
     image: node:22-alpine
     working_dir: /app
@@ -9,6 +15,7 @@ services:
     environment:
       NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: "1"
+      NEXT_PUBLIC_TURNSTILE_ENABLED: "false"
       WATCHPACK_POLLING: "true"
       CHOKIDAR_USEPOLLING: "true"
       NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_PUBLIC_URL:-http://localhost:8100}

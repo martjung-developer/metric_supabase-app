@@ -66,6 +66,7 @@ const BACK_BTN: React.CSSProperties = {
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function SignupPage() {
+  const turnstileEnabled = process.env.NEXT_PUBLIC_TURNSTILE_ENABLED !== 'false'
   const supabase = createClient()
   const {
     state, stepIndex, loading, error, showPw, strength,
@@ -532,7 +533,7 @@ export default function SignupPage() {
                   type="button"
                   className={styles.submitBtn}
                   style={{ flex: 1, marginTop: 0 }}
-                  disabled={loading || sendingOtp || !captchaToken}
+                  disabled={loading || sendingOtp || (turnstileEnabled && !captchaToken)}
                   onClick={handleSubmit}
                   whileHover={loading || sendingOtp ? {} : { y: -1 }}
                   whileTap={loading || sendingOtp ? {} : { scale: 0.985 }}
@@ -556,7 +557,7 @@ export default function SignupPage() {
                 <label className={styles.label} htmlFor="signup-otp">6-digit code</label>
                 <input id="signup-otp" className={styles.input} inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={otp} onChange={(event) => setOtp(event.target.value.replace(/\D/g, '').slice(0, 6))} />
               </div>
-              <button type="button" className={styles.switchLink} disabled={loading || cooldown > 0 || !captchaToken} onClick={async () => {
+              <button type="button" className={styles.switchLink} disabled={loading || cooldown > 0 || (turnstileEnabled && !captchaToken)} onClick={async () => {
                 setVerifyError(null)
                 const result = await sendSignupOtp(state.email, captchaToken)
                 if (result.success) { setCooldown(60); turnstileRef.current?.reset() }

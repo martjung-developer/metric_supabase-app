@@ -47,15 +47,26 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: '/images/metriclogo-title.png',
+        url: '/icons/favicon-32.png?v=2',
+        sizes: '32x32',
+        type: 'image/png',
+      },
+      {
+        url: '/icons/favicon-48.png?v=2',
+        sizes: '48x48',
+        type: 'image/png',
+      },
+      {
+        url: '/icons/icon-192.png?v=2',
+        sizes: '192x192',
         type: 'image/png',
       },
     ],
     apple: [
       {
-        url: '/images/metriclogo-title.png',
+        url: '/icons/apple-touch-icon.png?v=2',
         sizes: '180x180',
-        type: 'image/png',  
+        type: 'image/png',
       },
     ],
   },
