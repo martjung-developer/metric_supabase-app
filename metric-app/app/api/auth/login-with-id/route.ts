@@ -43,7 +43,7 @@ function consumeRateLimit(key: string, limit: number, now: number): boolean {
 }
 
 function getServiceClient() {
-  const url = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL
+  const url = process.env.SUPABASE_INTERNAL_URL ?? process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SECRET_KEY
   if (!url || !key) {
     throw new Error('Service client unavailable')
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     if (!id || !password) {
       return genericFailure()
     }
-    if (input.captchaToken !== undefined && !captchaToken) {
+    if (process.env.NEXT_PUBLIC_TURNSTILE_ENABLED !== 'false' && input.captchaToken !== undefined && !captchaToken) {
       return genericFailure()
     }
     if (consumeRateLimit(`ip:${ip}`, IP_LIMIT, Date.now())) {

@@ -102,7 +102,7 @@ async function decodeCache(raw: string, userId: string): Promise<Scope | null> {
 async function resolveScope(
   request: NextRequest,
 ): Promise<{ scope: Scope | null; userId: string | null; fresh: boolean; cookiesToSet: SupabaseCookie[] }> {
-  const url = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL
+  const url = process.env.SUPABASE_INTERNAL_URL ?? process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   const cookiesToSet: SupabaseCookie[] = []
   if (!url || !key) { return { scope: null, userId: null, fresh: false, cookiesToSet } }

@@ -21,7 +21,7 @@ export async function POST(req: Request): Promise<NextResponse> {
     return NextResponse.json({ error: 'Confirm the new email address before syncing it.' }, { status: 403 })
   }
 
-  const url = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL
+  const url = process.env.SUPABASE_INTERNAL_URL ?? process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SECRET_KEY
   if (!url || !key) {
     return NextResponse.json({ error: 'Email sync is unavailable.' }, { status: 500 })

@@ -102,7 +102,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   const cookieStore = await cookies()
   const supabase = createServerClient<Database>(
-    process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
+    process.env.SUPABASE_INTERNAL_URL ?? process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
     serviceKey,
     {
       cookies: {
@@ -113,7 +113,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   )
 
   const otpSupabase = createSupabaseClient(
-    process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
+    process.env.SUPABASE_INTERNAL_URL ?? process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
     serviceKey,
     { auth: { persistSession: false, autoRefreshToken: false } },
   )
