@@ -11,6 +11,5 @@ volumes/functions/hello/**
 !volumes/functions/hello/index.ts
 .env
 test.http
-docker-compose.override.yml
 .supabase-version
 backups

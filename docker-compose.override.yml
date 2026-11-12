@@ -1,0 +1,27 @@
+services:
+  nextjs:
+    image: node:22-alpine
+    working_dir: /app
+    restart: unless-stopped
+    command: sh -c "corepack enable && (test -x node_modules/.bin/next || pnpm install) && pnpm dev --hostname 0.0.0.0"
+    ports:
+      - "3100:3000"
+    environment:
+      NODE_ENV: development
+      NEXT_TELEMETRY_DISABLED: "1"
+      WATCHPACK_POLLING: "true"
+      CHOKIDAR_USEPOLLING: "true"
+      NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_PUBLIC_URL:-http://localhost:8100}
+      SUPABASE_URL: http://kong:8100
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
+    volumes:
+      - ./metric-app:/app
+      - nextjs_node_modules:/app/node_modules
+      - nextjs_cache:/app/.next
+    depends_on:
+      api-gw:
+        condition: service_healthy
+
+volumes:  
+  nextjs_node_modules:
+  nextjs_cache:
