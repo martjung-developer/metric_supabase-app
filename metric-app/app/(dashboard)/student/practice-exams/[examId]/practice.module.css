@@ -876,3 +876,14 @@
 :global(html.dark) .tfBtn {
   border-color: #243247;
 }
+
+@media (max-width: 768px) {
+  .shell, .completion, .center { min-height: 100vh; min-height: 100dvh; }
+  .topBar { padding-top: max(0px, env(safe-area-inset-top)); padding-left: max(0.75rem, env(safe-area-inset-left)); padding-right: max(0.75rem, env(safe-area-inset-right)); }
+  .content { min-width: 0; padding-left: 0.875rem; padding-right: 0.875rem; padding-bottom: calc(1.25rem + env(safe-area-inset-bottom)); }
+  .palBtn, .btnCheck, .btnRetry, .btnNav, .btnFinish, .btnRetryAll, .btnBackList { min-width: 44px; min-height: 44px; }
+  .optionBtn, .tfBtn { min-height: 48px; }
+  .textArea, .fillInput, .matchInput { min-height: 44px; font-size: 16px; }
+  .navBar { padding-bottom: max(0.75rem, env(safe-area-inset-bottom)); }
+  .matchRow { flex-wrap: wrap; }
+}

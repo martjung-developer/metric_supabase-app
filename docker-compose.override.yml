@@ -3,11 +3,11 @@ services:
     image: node:22-alpine
     working_dir: /app
     restart: unless-stopped
-    command: sh -c "corepack enable && (test -x node_modules/.bin/next || pnpm install) && pnpm dev --hostname 0.0.0.0"
+    command: sh -c "corepack enable && (test -x node_modules/.bin/next || pnpm install) && pnpm build && mkdir -p .next/standalone/public .next/standalone/.next/static && cp -r public/. .next/standalone/public/ && cp -r .next/static/. .next/standalone/.next/static/ && HOSTNAME=0.0.0.0 PORT=3000 node .next/standalone/server.js"
     ports:
       - "3100:3000"
     environment:
-      NODE_ENV: development
+      NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: "1"
       WATCHPACK_POLLING: "true"
       CHOKIDAR_USEPOLLING: "true"

@@ -228,7 +228,10 @@
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .searchWrap { max-width: 200px; }
-  .topbar     { padding: 0 1rem; }
+  .topbar { padding-left: max(1rem, env(safe-area-inset-left)); padding-right: max(1rem, env(safe-area-inset-right)); }
+  .iconBtn, .avatarBtn { min-width: 44px; min-height: 44px; }
+  .searchInput { font-size: 16px; }
+  .profileMenuItem { min-height: 44px; font-size: 16px; }
 }
 
 @media (max-width: 480px) {

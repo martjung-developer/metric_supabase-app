@@ -807,6 +807,26 @@
   }
 }
 
+@media (max-width: 768px) {
+  .shell { inset: 0; width: 100%; overflow-x: hidden; }
+  .header { padding-top: max(8px, env(safe-area-inset-top)); padding-left: max(12px, env(safe-area-inset-left)); padding-right: max(12px, env(safe-area-inset-right)); }
+  .pageBody { height: calc(100vh - 56px); min-height: 0; overflow-y: auto; }
+  .leftPanel { max-height: 35vh; overflow-y: auto; }
+  .numBtn, .jumpBtn, .flagIconBtn, .headerGhostBtn, .headerGhostIconBtn,
+  .submitHeaderBtn, .footerGhost, .footerOutlineBtn, .footerPrimaryBtn,
+  .primaryBtn, .outlineBtn, .outlineDangerBtn { min-height: 44px; }
+  .numBtn { min-width: 44px; }
+  .textInput, .matchInput { min-height: 44px; font-size: 16px; }
+  .questionFooter { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+  .modalOverlay { padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); overflow-y: auto; }
+}
+
+@supports (height: 100dvh) {
+  @media (max-width: 768px) {
+    .pageBody { height: calc(100dvh - 56px); }
+  }
+}
+
 :global(html.dark) .submitHeaderBtn,
 :global(html.dark) .leftPanel,
 :global(html.dark) .dotNotVisited,

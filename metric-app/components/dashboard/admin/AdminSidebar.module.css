@@ -334,3 +334,8 @@
   padding: 0.575rem 0;
   border-color: rgba(239, 68, 68, 0.15);
 }
+
+@media (max-width: 768px) {
+  .sidebar { height: 100vh; height: 100dvh; padding-bottom: max(0.75rem, env(safe-area-inset-bottom)); }
+  .menuToggle, .navItem, .logoutBtn { min-height: 44px; }
+}

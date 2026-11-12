@@ -475,3 +475,10 @@
   .otpInput { width: 40px; height: 48px; font-size: 1.1rem; }
   .programGrid { grid-template-columns: repeat(2,1fr); }
 }
+
+@media (max-width: 768px) {
+  .authPage { min-height: 100vh; min-height: 100dvh; padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left)); }
+  .card { width: 100%; max-width: 460px; }
+  .input { min-height: 44px; font-size: 16px; }
+  .inputToggle, .submitBtn, .googleBtn, .facebookBtn, .programBtn, .resendBtn, .roleHintChange { min-height: 44px; }
+}

@@ -597,6 +597,14 @@
   .card       { padding: 1rem; }
 }
 
+@media (max-width: 768px) {
+  .page { min-height: 100vh; min-height: 100dvh; min-width: 0; overflow-x: clip; }
+  .heroBanner, .mainGrid { min-width: 0; }
+  .mainGrid { grid-template-columns: minmax(0, 1fr); }
+  .statsGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ctaBtn, .heroCta, .quickItem, .emptyBtn, .tipBtn { min-height: 44px; }
+}
+
 .spinning {
   animation: spin 1s linear infinite;
 }
