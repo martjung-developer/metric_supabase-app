@@ -6,14 +6,17 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-"display_override": [
-  "window-controls-overlay",
-  "standalone"
-],
+  "display_override": [
+    "window-controls-overlay",
+    "standalone"
+  ],
   "orientation": "portrait",
   "background_color": "#0d1117",
   "theme_color": "#0d1117",
-  "categories": ["education", "productivity"],
+  "categories": [
+    "education",
+    "productivity"
+  ],
   "lang": "en-PH",
   "icons": [
     {
@@ -47,14 +50,24 @@
       "short_name": "Dashboard",
       "description": "Go to your student dashboard",
       "url": "/student/dashboard",
-      "icons": [{ "src": "/icons/icon-192.png?v=2", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/icons/icon-192.png?v=2",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "Mock Exams",
       "short_name": "Exams",
       "description": "Take a mock board exam",
       "url": "/student/mock-exams",
-      "icons": [{ "src": "/icons/icon-192.png?v=2", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/icons/icon-192.png?v=2",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }
