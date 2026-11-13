@@ -118,19 +118,21 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     { auth: { persistSession: false, autoRefreshToken: false } },
   )
 
-  const otpCutoff = new Date(Date.now() - 15 * 60 * 1000).toISOString()
-  const { data: consumedOtp, error: otpError } = await otpSupabase
-    .from('signup_otps')
-    .select('id')
-    .eq('email', submittedEmail.trim().toLowerCase())
-    .not('consumed_at', 'is', null)
-    .gte('consumed_at', otpCutoff)
-    .order('consumed_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-  if (otpError || !consumedOtp) {
-    if (otpError) { logSupabaseError('signup OTP lookup failed', otpError) }
-    return NextResponse.json({ success: false, error: 'Verify your email before completing signup.' }, { status: 403 })
+  if (process.env.SIGNUP_OTP_ENABLED !== 'false') {
+    const otpCutoff = new Date(Date.now() - 15 * 60 * 1000).toISOString()
+    const { data: consumedOtp, error: otpError } = await otpSupabase
+      .from('signup_otps')
+      .select('id')
+      .eq('email', submittedEmail.trim().toLowerCase())
+      .not('consumed_at', 'is', null)
+      .gte('consumed_at', otpCutoff)
+      .order('consumed_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (otpError || !consumedOtp) {
+      if (otpError) { logSupabaseError('signup OTP lookup failed', otpError) }
+      return NextResponse.json({ success: false, error: 'Verify your email before completing signup.' }, { status: 403 })
+    }
   }
 
   const { data: programRow, error: programErr } = await supabase

@@ -1,7 +1,7 @@
-import { randomInt } from 'node:crypto'
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import nodemailer from 'nodemailer'
+import { OTP_RESEND_COOLDOWN } from '@/lib/constants/auth'
 
 export const runtime = 'nodejs'
 
@@ -30,6 +30,12 @@ export async function POST(request: NextRequest) {
   const captchaToken = (body as { captchaToken: string }).captchaToken
   if (!/^[^\s@]+@lccbonline\.edu\.ph$/i.test(email)) {
     return NextResponse.json({ error: 'Please use your @lccbonline.edu.ph school email.' }, { status: 403 })
+  }
+
+  const smtpPassword = process.env.SMTP_PASSWORD?.replace(/\s/g, '')
+  if (!smtpPassword) {
+    console.error('[signup-otp/send] SMTP_PASSWORD is missing.')
+    return NextResponse.json({ error: 'SMTP_PASSWORD is not configured.' }, { status: 404 })
   }
 
   if (process.env.NEXT_PUBLIC_TURNSTILE_ENABLED !== 'false') {
@@ -75,7 +81,7 @@ export async function POST(request: NextRequest) {
     console.error('[signup-otp/send] Rate-limit query failed:', countError.message)
     return NextResponse.json({ error: 'Could not send a code right now.' }, { status: 500 })
   }
-  if ((count ?? 0) >= 5) {
+  if ((count ?? 0) >= 10) {
     return NextResponse.json({ error: 'Too many codes requested. Please try again later.' }, { status: 429 })
   }
 
@@ -90,16 +96,14 @@ export async function POST(request: NextRequest) {
     console.error('[signup-otp/send] Cooldown query failed:', latestError.message)
     return NextResponse.json({ error: 'Could not send a code right now.' }, { status: 500 })
   }
-  if (latest && now.getTime() - new Date(latest.created_at).getTime() < 60_000) {
-    return NextResponse.json({ error: 'Please wait 60 seconds before requesting another code.' }, { status: 429 })
+  if (latest && now.getTime() - new Date(latest.created_at).getTime() < OTP_RESEND_COOLDOWN * 1000) {
+    return NextResponse.json({ error: `Please wait ${OTP_RESEND_COOLDOWN} seconds before requesting another code.` }, { status: 429 })
   }
 
-  const smtpHost = process.env.SMTP_HOST
-  const smtpPort = Number(process.env.SMTP_PORT ?? 587)
-  const smtpUser = process.env.SMTP_USER
-  const smtpPassword = process.env.SMTP_PASSWORD
+  const smtpUser = process.env.SMTP_USER?.replace(/^EMAIL=/i, '').trim()
   const smtpFrom = process.env.SMTP_FROM ?? process.env.RESEND_FROM_EMAIL ?? smtpUser
-  if (!smtpHost || !smtpUser || !smtpPassword || !smtpFrom || !Number.isFinite(smtpPort)) {
+  const smtpReady = Boolean(smtpUser && smtpPassword && smtpFrom)
+  if (!smtpReady) {
     console.error('[signup-otp/send] SMTP configuration is incomplete.')
     return NextResponse.json({ error: 'Email delivery is temporarily unavailable.' }, { status: 500 })
   }
@@ -114,7 +118,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Could not send a code right now.' }, { status: 500 })
   }
 
-  const code = String(randomInt(100_000, 1_000_000))
+  const code = String(Math.floor(100_000 + Math.random() * 900_000))
   const { data: inserted, error: insertError } = await supabase
     .from('signup_otps')
     .insert({ email, code, expires_at: new Date(now.getTime() + 10 * 60 * 1000).toISOString() })
@@ -125,22 +129,23 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Could not send a code right now.' }, { status: 500 })
   }
 
+  const message = {
+    from: smtpFrom,
+    to: email,
+    subject: 'Your M.E.T.R.I.C. verification code',
+    text: `Your signup verification code is ${code}. It expires in 10 minutes.`,
+    html: `<p>Your signup verification code is <strong>${code}</strong>.</p><p>It expires in 10 minutes.</p>`,
+  }
+
   try {
     const transporter = nodemailer.createTransport({
-      host: smtpHost,
-      port: smtpPort,
-      secure: smtpPort === 465,
+      service: 'gmail',
       auth: { user: smtpUser, pass: smtpPassword },
     })
-    await transporter.sendMail({
-      from: smtpFrom,
-      to: email,
-      subject: 'Your M.E.T.R.I.C. verification code',
-      text: `Your signup verification code is ${code}. It expires in 10 minutes.`,
-      html: `<p>Your signup verification code is <strong>${code}</strong>.</p><p>It expires in 10 minutes.</p>`,
-    })
+    await transporter.sendMail(message)
   } catch (error) {
-    console.error('[signup-otp/send] Email delivery failed:', error)
+    const diagnostic = error instanceof Error ? error.message : 'Unknown SMTP error.'
+    console.error('[signup-otp/send] Email delivery failed:', diagnostic)
     await supabase.from('signup_otps').update({ consumed_at: new Date().toISOString() }).eq('id', inserted.id)
     return NextResponse.json({ error: 'Could not deliver the code. Please try again.' }, { status: 502 })
   }

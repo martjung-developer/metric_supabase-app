@@ -12,6 +12,7 @@ import { useSignup, SIGNUP_STEPS } from '@/lib/hooks/auth/useSignup'
 import type { SignupProgram }      from '@/lib/hooks/auth/useSignup'
 import { createClient }            from '@/lib/supabase/client'
 import { sendSignupOtp, verifySignupOtp } from '@/lib/services/auth'
+import { OTP_RESEND_COOLDOWN } from '@/lib/constants/auth'
 import Turnstile, { type TurnstileHandle } from '@/components/auth/Turnstile'
 
 const YEAR_LEVEL_OPTIONS = [
@@ -67,6 +68,7 @@ const BACK_BTN: React.CSSProperties = {
 
 export default function SignupPage() {
   const turnstileEnabled = process.env.NEXT_PUBLIC_TURNSTILE_ENABLED !== 'false'
+  const signupOtpEnabled = process.env.NEXT_PUBLIC_SIGNUP_OTP_ENABLED !== 'false'
   const supabase = createClient()
   const {
     state, stepIndex, loading, error, showPw, strength,
@@ -153,13 +155,25 @@ export default function SignupPage() {
 
   async function handleSubmit() {
     setVerifyError(null)
+    if (!signupOtpEnabled) {
+      const account = await handleSignupWithReturn()
+      if (!account.success || !account.userId) {
+        setVerifyError(account.error ?? 'Unable to create your account. Please try again.')
+        return
+      }
+      setCreatedEmail(state.email)
+      setEmailConfirmationRequired(false)
+      setShowSuccess(true)
+      return
+    }
+
     setSendingOtp(true)
     const result = await sendSignupOtp(state.email, captchaToken)
     setSendingOtp(false)
     if (result.success) {
       setCaptchaToken('')
       setOtp('')
-      setCooldown(60)
+      setCooldown(OTP_RESEND_COOLDOWN)
       setVerifyError(null)
       turnstileRef.current?.reset()
       setStep('verify')
@@ -521,10 +535,12 @@ export default function SignupPage() {
               </div>
 
               <p style={{ fontSize: '0.78rem', color: '#64748b', textAlign: 'center', margin: 0 }}>
-                Verify your school email to finish creating your account.
+                {signupOtpEnabled
+                  ? 'Verify your school email to finish creating your account.'
+                  : 'Create your account with the details shown above.'}
               </p>
 
-              <Turnstile ref={turnstileRef} onToken={setCaptchaToken} />
+              {signupOtpEnabled && <Turnstile ref={turnstileRef} onToken={setCaptchaToken} />}
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <button type="button" onClick={goBack} style={BACK_BTN}>
                   <ArrowLeft size={15} color="#64748b" />
@@ -533,14 +549,14 @@ export default function SignupPage() {
                   type="button"
                   className={styles.submitBtn}
                   style={{ flex: 1, marginTop: 0 }}
-                  disabled={loading || sendingOtp || (turnstileEnabled && !captchaToken)}
+                  disabled={loading || sendingOtp || (signupOtpEnabled && turnstileEnabled && !captchaToken)}
                   onClick={handleSubmit}
                   whileHover={loading || sendingOtp ? {} : { y: -1 }}
                   whileTap={loading || sendingOtp ? {} : { scale: 0.985 }}
                 >
-                  {sendingOtp
-                    ? <><Loader2 size={15} className={styles.spinnerIcon} /> Sending code…</>
-                    : <> Send verification code <ArrowRight size={15} strokeWidth={2.5} /></>}
+                  {loading || sendingOtp
+                    ? <><Loader2 size={15} className={styles.spinnerIcon} /> {signupOtpEnabled ? 'Sending code…' : 'Creating account…'}</>
+                    : <>{signupOtpEnabled ? 'Send verification code' : 'Create account'} <ArrowRight size={15} strokeWidth={2.5} /></>}
                 </motion.button>
               </div>
             </div>
@@ -560,7 +576,7 @@ export default function SignupPage() {
               <button type="button" className={styles.switchLink} disabled={loading || cooldown > 0 || (turnstileEnabled && !captchaToken)} onClick={async () => {
                 setVerifyError(null)
                 const result = await sendSignupOtp(state.email, captchaToken)
-                if (result.success) { setCooldown(60); turnstileRef.current?.reset() }
+                if (result.success) { setCooldown(OTP_RESEND_COOLDOWN); turnstileRef.current?.reset() }
                 else { setVerifyError('Could not resend the code. Please try again.'); turnstileRef.current?.reset() }
               }}>Resend code{cooldown > 0 ? ` (${cooldown}s)` : ''}</button>
               <div style={{ display: 'flex', gap: '0.5rem' }}>

@@ -31,7 +31,7 @@ export const POST_LOGIN: Record<string, string> = {
 export const OTP_LENGTH = 6
 
 /** Seconds the user must wait before requesting a new OTP. */
-export const OTP_RESEND_COOLDOWN = 60
+export const OTP_RESEND_COOLDOWN = 15
 
 /** OTP validity window in milliseconds (10 minutes). */
 export const OTP_TTL_MS = 10 * 60 * 1000
