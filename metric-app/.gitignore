@@ -49,3 +49,7 @@ supabase_local/.env
 supabase_local/.env.*
 supabase_local/volumes/db/data/
 .env.local
+
+.pnpm-store/
+.next/
+node_modules/
