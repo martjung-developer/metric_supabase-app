@@ -36,6 +36,8 @@ services:
     depends_on:
       api-gw:
         condition: service_healthy
+    extra_hosts:
+      - "kong.local:host-gateway"
 
 volumes:  
   nextjs_node_modules:

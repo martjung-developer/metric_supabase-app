@@ -542,8 +542,8 @@ services:
     image: supabase/supavisor:2.9.13
     restart: unless-stopped
     ports:
-      - ${POSTGRES_PORT}:5432
-      - ${POOLER_PROXY_PORT_TRANSACTION}:6543
+      - ${POSTGRES_PORT_HOST:-5432}:5432
+      - ${POOLER_PROXY_PORT_TRANSACTION_HOST:-6546}:6543
     volumes:
       - ./volumes/pooler/pooler.exs:/etc/pooler/pooler.exs:ro,z
     healthcheck:

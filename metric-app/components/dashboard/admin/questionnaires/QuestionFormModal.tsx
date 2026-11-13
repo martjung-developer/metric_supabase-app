@@ -24,6 +24,7 @@ import { modalVariants }            from '@/animations/admin/questionnaires/ques
 import { createClient }             from '@/lib/supabase/client'
 import type { QuestionType }        from '@/lib/types/database'
 import type { UseQuestionnairesReturn } from '@/lib/hooks/admin/questionnaires/useQuestionnaires'
+import { createUuid } from '@/lib/utils/shared/uuid'
 import styles                       from '@/app/(dashboard)/admin/questionnaires/questionnaires.module.css'
 
 type Q = UseQuestionnairesReturn
@@ -84,7 +85,7 @@ export function QuestionFormModal({ q }: QuestionFormModalProps) {
         ? (q.programs.find((p) => p.id === q.form.program_id)?.code ?? 'general')
         : 'general'
       const examSegment = q.form.exam_id || 'unassigned'
-      const path = `${programSegment}/exams/${examSegment}/${crypto.randomUUID()}-${safeName}`
+      const path = `${programSegment}/exams/${examSegment}/${createUuid()}-${safeName}`
 
       const { error: uploadErr } = await supabase.storage
         .from(IMAGE_BUCKET)

@@ -14,6 +14,7 @@ import type {
   RealtimePostgresChangesPayload,
 } from '@supabase/supabase-js'
 import type { Database } from '@/lib/types/database'
+import { createUuid } from '@/lib/utils/shared/uuid'
 
 type ProfileRow = Database['public']['Tables']['profiles']['Row']
 
@@ -34,7 +35,7 @@ export function useRealtimeProfile({
     if (!userId) {return}
 
     // ✅ UNIQUE CHANNEL NAME (critical fix)
-    const channelName = `profile:${userId}:${crypto.randomUUID()}`
+    const channelName = `profile:${userId}:${createUuid()}`
 
     const channel = supabase.channel(channelName)
 

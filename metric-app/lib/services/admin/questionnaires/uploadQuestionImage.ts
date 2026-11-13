@@ -2,6 +2,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { IMAGE_BUCKET } from '@/lib/constants/admin/questionnaires/questionnaires.constants'
+import { createUuid } from '@/lib/utils/shared/uuid'
 
 export interface UploadedImage {
   filename:  string
@@ -66,7 +67,7 @@ export async function uploadImportedQuestionImages(
       const suppliedExtension = file.name.split('.').pop()?.toLowerCase() ?? ''
       const mimeExtension = file.type.split('/')[1]?.replace('jpeg', 'jpg').split('+')[0] ?? ''
       const extension = /^[a-z0-9]{2,5}$/.test(suppliedExtension) ? suppliedExtension : mimeExtension || 'png'
-      const path = `${safeProgramCode}/${crypto.randomUUID()}.${extension}`
+      const path = `${safeProgramCode}/${createUuid()}.${extension}`
       const { error } = await supabase.storage.from(IMAGE_BUCKET).upload(path, file, {
         cacheControl: '3600',
         upsert: false,
